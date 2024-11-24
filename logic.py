@@ -11,7 +11,14 @@ class DB_Manager:
     def create_tables(self):
         conn = sqlite3.connect(self.database)
         with conn:
-            conn.execute('''CREATE TABLE projects (
+            # Проверяем, существует ли столбец description
+            cur = conn.cursor()
+            cur.execute("PRAGMA table_info(projects)")
+            columns = [column[1] for column in cur.fetchall()]
+            if 'description' not in columns:
+                cur.execute("ALTER TABLE projects ADD COLUMN description TEXT")
+            
+            conn.execute('''CREATE TABLE IF NOT EXISTS projects (
                             project_id INTEGER PRIMARY KEY,
                             user_id INTEGER,
                             project_name TEXT NOT NULL,
@@ -20,17 +27,17 @@ class DB_Manager:
                             status_id INTEGER,
                             FOREIGN KEY(status_id) REFERENCES status(status_id)
                         )''') 
-            conn.execute('''CREATE TABLE skills (
+            conn.execute('''CREATE TABLE IF NOT EXISTS skills (
                             skill_id INTEGER PRIMARY KEY,
                             skill_name TEXT
                         )''')
-            conn.execute('''CREATE TABLE project_skills (
+            conn.execute('''CREATE TABLE IF NOT EXISTS project_skills (
                             project_id INTEGER,
                             skill_id INTEGER,
                             FOREIGN KEY(project_id) REFERENCES projects(project_id),
                             FOREIGN KEY(skill_id) REFERENCES skills(skill_id)
                         )''')
-            conn.execute('''CREATE TABLE status (
+            conn.execute('''CREATE TABLE IF NOT EXISTS status (
                             status_id INTEGER PRIMARY KEY,
                             status_name TEXT
                         )''')
@@ -59,8 +66,8 @@ class DB_Manager:
 
     def insert_project(self, data):
         sql = """INSERT INTO projects 
-(user_id, project_name, url, status_id) 
-values(?, ?, ?, ?)"""
+(user_id, project_name, description, url, status_id) 
+values(?, ?, ?, ?, ?)"""
         self.__executemany(sql, data)
 
     def insert_skill(self, user_id, project_name, skill):
