@@ -1,4 +1,4 @@
-from logic import DB_Manager
+from logic import *
 from config import *
 from telebot import TeleBot
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
@@ -253,7 +253,7 @@ def text_handler(message):
         info_project(message, user_id, project)
         return
     bot.reply_to(message, "Тебе нужна помощь?")
-    info(message)
+    start_command(message)
 
     
 if __name__ == '__main__':
